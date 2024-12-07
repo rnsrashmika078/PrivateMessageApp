@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import io from "socket.io-client";
 // import './App.css';
-import './CSS/chat.css';
+import './chat.css';
 import { useLocation } from "react-router-dom";
 const Chat = () => {
   const location = useLocation();

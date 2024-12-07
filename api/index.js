@@ -8,7 +8,7 @@ const httpServer = createServer((req, res) => {
 
 const io = new Server(httpServer, {
   cors: {
-    origin: "https://your-react-app.vercel.app", // Your deployed frontend URL
+    origin: "https://private-message-app-eight.vercel.app/", // Your deployed frontend URL
     methods: ["GET", "POST"],
     credentials: true,
   },

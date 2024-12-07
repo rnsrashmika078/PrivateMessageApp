@@ -27,7 +27,7 @@ const Chat = () => {
 
 
   useEffect(() => {
-    const newSocket = io("http://localhost:3000",{
+    const newSocket = io("https://private-message-app-eight.vercel.app/",{
       transports: ["websocket"], // Ensures WebSocket is used
       withCredentials: true,    // Allows cookies and credentials
     });

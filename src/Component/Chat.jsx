@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import io from "socket.io-client";
-// import './App.css';
 import './chat.css';
 import { useLocation } from "react-router-dom";
+
 const Chat = () => {
   const location = useLocation();
   const recData = location.state;
@@ -11,46 +11,34 @@ const Chat = () => {
   const [socket, setSocket] = useState(null);
   const [userId, setUserId] = useState(null);
   const [arrayuserId, setarrayUserId] = useState([]); // Initialize as an array
-  const [data ,setData] = useState({
-    dp : '',
+  const [data, setData] = useState({
+    dp: '',
     username: ''
- })
+  });
 
   const bottomRef = useRef(null);
 
   const scrollToBottom = () => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   };
-  const[connectUser,setConnectUser] = useState(false);
-  
-  
 
+  const [connectUser, setConnectUser] = useState(false);
 
   useEffect(() => {
-    const newSocket = io("https://private-message-app-eight.vercel.app/",{
+    const newSocket = io("https://private-message-app-eight.vercel.app/", {
       transports: ["websocket"], // Ensures WebSocket is used
       withCredentials: true,    // Allows cookies and credentials
     });
+
     setSocket(newSocket);
 
-
-
-
-   
-    // Assign a unique ID to each user when they connect
     newSocket.on("connect", () => {
       console.log("Connected to server");
-      localStorage.clear();
       setConnectUser(true);
-      setUserId(newSocket.id); 
+      setUserId(newSocket.id);
       setarrayUserId((prevArray) => [...prevArray, newSocket.id]);
-      // localStorage.setItem(userId,'true');
-      
-      
     });
 
-
-  
     newSocket.on("message", (msg) => {
       console.log("Received message:", msg);
       setMessages((prevMessages) => [...prevMessages, msg]);
@@ -61,25 +49,29 @@ const Chat = () => {
       console.log("Disconnected from server");
     });
 
+    // Cleanup on unmount
     return () => {
       newSocket.disconnect();
     };
   }, []);
-  useEffect(() =>{
 
-  })
+  useEffect(() => {
+    if (recData) {
+      setData(recData); // Initialize data state from recData
+    }
+  }, [recData]);
 
-   useEffect(() =>{
+  useEffect(() => {
     scrollToBottom();
-    },[messages])
+  }, [messages]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (socket && userId) {
-      socket.emit("message", { 
-        userId, // Attach userId to each message
-        user:data.username,
-        dp:data.dp,
+      socket.emit("message", {
+        userId,
+        user: data.username,
+        dp: data.dp,
         text: message,
       });
       setMessage(""); // Clear input field
@@ -88,60 +80,41 @@ const Chat = () => {
     }
   };
 
-  const handleOnChange = (e) =>{
-    setData({...data, [e.target.name]: e.target.value})
-    console.log(data.username);
-  }
-  useEffect(()=>{
-    setData(recData);
-    console.log(recData.username);
-  },[recData])
-  const handleSubmission = () =>{
-    console.log("username :  " ,data.username);
-  }
+  const handleOnChange = (e) => {
+    setData({ ...data, [e.target.name]: e.target.value });
+  };
 
   return (
-    <>
     <div>
- 
-
-      
-        {/* <button type="button" onClick={handleSubmission}>Enter</button> */}
-        {/* <input type="text" name="username" value={data.username} onChange={handleOnChange}></input>       */}
-        <ul className="chat-body">
-          <p className="header-username">PRIVATE CHAT </p>
-          {arrayuserId.map((id, index) => (
-  <li style={{fontSize:'15px', marginTop:'20px' , color:'white', backgroundColor:'red', marginRight:'200px'}}key={index}>{connectUser ? "Your are Connected: " + id : "Disconnected"}</li>
-))}
+      <ul className="chat-body">
+        <p className="header-username">PRIVATE CHAT</p>
+        {arrayuserId.map((id, index) => (
+          <li style={{ fontSize: '15px', marginTop: '20px', color: 'white', backgroundColor: 'red', marginRight: '200px' }} key={index}>
+            {connectUser ? "You are Connected: " + id : "Disconnected"}
+          </li>
+        ))}
         {messages.map((msg, index) => (
-          <li
-            key={index}
-            ref={bottomRef}
-            className={msg.userId === userId ? "sent-message" : "received-message"} 
-          >
-            
-           
+          <li key={index} ref={bottomRef} className={msg.userId === userId ? "sent-message" : "received-message"}>
             <div className="messagebody">
-              <><img className="img" src={msg.dp}></img><p className="sendername">{msg.user}</p> : <p className="message">{msg.text}</p></>
+              <img className="img" src={msg.dp} alt="dp" />
+              <p className="sendername">{msg.user}</p>: <p className="message">{msg.text}</p>
             </div>
           </li>
         ))}
       </ul>
       <form onSubmit={handleSubmit}>
         <div className="area">
-        <input className="field"
-          type="text"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-        />
-        <button type="submit" className="btn">Send</button>
+          <input
+            className="field"
+            type="text"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+          />
+          <button type="submit" className="btn">Send</button>
         </div>
-        
       </form>
     </div>
-    </>
   );
-  
 };
 
 export default Chat;
